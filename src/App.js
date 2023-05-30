@@ -1,24 +1,43 @@
 import logo from './logo.svg';
 import './App.css';
+import axios from 'axios';
+import { useState } from 'react';
+import SearchForm from './SearchForm/SearchForm';
+import RepoCard from './Repos/RepoCard';
 
+
+
+const baseURL = "https://api.github.com/search/repositories?q=org:"
 function App() {
+
+  const [cards, setCards] = useState([])
+  const [org, setOrg] = useState("")
+
+  const fetchData = async () => {
+
+    const { data } = await axios.get(baseURL + org, {
+      params: {
+        sort: "forks",
+        per_page: 10
+      },
+    })
+    console.log("fetching")
+
+    setCards(data.items)
+  }
+
+  const handleSubmit = async () => {
+    await fetchData()
+    setOrg("")
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <SearchForm setOrg={setOrg} org={org} handleSubmit={handleSubmit} />
+
+      {cards.map((c => <RepoCard data={c} key={c.id} />))}
+
+    </>
   );
 }
 
